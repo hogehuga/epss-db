@@ -54,7 +54,7 @@ therefore...
 
 # How to use this.
 
-1. Clone this project. (ex. `$git clone github.com/hogehuga/epss-db`)
+1. Clone this project. (ex. `$git clone https://github.com/hogehuga/epss-db`)
 2. Run "epss-init.sh" script. (ex. `$sh epss-init.sh`)
 3. Run "epss-prerocessing.sh" script. (ex. `$sh epss-preprocessing.sh`)
 4. Run "epss-import.sh" script. (ex. `$sh epss-import.sh`)
