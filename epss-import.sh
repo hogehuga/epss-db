@@ -6,5 +6,5 @@ for file in *.csv
 do
 	echo "importing: $file"
 	sqlite3 ../epss-db.sqlite3 ".mode csv" ".import $file epss"
-	#rm $file
+	rm $file
 done
