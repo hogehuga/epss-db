@@ -7,6 +7,24 @@ Download all epss data, and import database. We can explore the data by SQL quer
 - Work on Ubuntu 24.04LTS
 - But, it's a common implementation, so it should work with a little adjustment.
 
+**VERY SLOW and IOWAITable**
+
+- Adding indexes speeds up data analysis.
+- However, adding more data slows it down.
+- Therefore, after you create a database, we recommend that you use it without adding any data to it.
+
+We are considering the intention to use mysql etc.
+
+- NO INDEX, NO ANALYSIS.
+- HAVE INDEX, HAVE DEADLY SLOW ADD DATA.
+
+# What's NEW!
+
+- 2023-12-10JST
+  - Added epss-add.sh to add data.
+- 2023-12-04JST
+  - First release.
+
 # Wht's This?
 
 EPSS is Exploit Prediction Scoreing Syste from FIRST ( https://www.first.org/epss/ ).
@@ -60,6 +78,12 @@ therefore...
 4. Run "epss-import.sh" script. (ex. `$sh epss-import.sh`)
 5. We'll investigate EPSS! (ex. `$sqlite3 epss-db.sqlite3`)
 
+If you want to add data for a specific day, please use epss-add.sh.
+(It is assumed that daily data will be added after the database is created.)
+
+6. Run "epss-add.sh -d YYYY-MM-DD". (ex. `$sh epss-add.sh -d 2023-12-31`)
+
+
 ## CAUTION
 
 - Be careful about disk usage fees.
@@ -68,8 +92,8 @@ therefore...
   - `epss-import.sh` minimizes disk growth. The imported data will be deleted.
   - Overall, we use 
 - Time
--   `epss-init.sh` need about 20min(Depends on transfer speed, FIRST's response).
--   `epss-preprocessing.sh` need about 30-40min
+  - `epss-init.sh` need about 20min(Depends on transfer speed, FIRST's response).
+  - `epss-preprocessing.sh` need about 30-40min
 
 ## How it works
 
@@ -91,7 +115,17 @@ therefore...
       - epss-data.sqlite3
       - `create table epss(cve TEXT, epss REAL, percentile REAL, model_version TEXT, score_date TEXT)`
     - import data from .csv files
-
+- epss-add.sh
+  - THIS SCRIPT IS SLOPPY...
+    - NEED TO RUN in ./epss-db DIRECTORY
+    - THE DATE MUST BE AFTER 2022/02/04.
+      - because only supports format after 2022/02/04.
+  - Mix of epss-(init|preprocessing|import).sh script for a specific date.
+    - check duplicate data
+    - file download
+    - preprocessing
+    - database import
+  - Checks are performed to prevent duplicate data from being registered.
 
 # UNIMPRLEMENTED
 
