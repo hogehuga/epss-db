@@ -1,9 +1,11 @@
 #!/bin/sh
 
+BASEPATH=/opt/epss-db
 # argument check
 DATEFLAG=false
 DATETARGET=""
 
+echo "argument check..."
 while getopts "d:" opt; do
   case $opt in
     d)
@@ -20,77 +22,91 @@ done
 if ! $DATEFLAG; then
     echo "NG: argument is not set."
     echo "  use -d YYYY-MM-DD arguments."
+    B
+    echo "   ; Please specify 2022-02-04 or later."
     exit 1
+fi
+
+## date check
+## if before 3rd pattern date, stoped.
+DATECOMPARE="2022-02-04"
+TARGETSECOUNDS=$(date -d "$DATETARGET" +%s)
+COMPARESECOUNDS=$(date -d "$DATECOMPARE" +%s)
+
+if [ $TARGETSECOUNDS -lt $COMPARESECONDS ]; then
+echo "bad"
+    echo "NG: Invalid date."
+    echo "Please specify 2022-02-04 or later."
+    return 1
 fi
 
 echo "... [ok] chk argument: $DATETARGET"
 
-# database check
-echo "database record exists check..."
-CHKDB=`sqlite3 epss-db.sqlite3 "select count(*) from epss where score_date=\"$DATETARGET\";"`
-if [ $CHKDB -ne 0 ]; then
-	echo "NG: Data EXISTS. DATA APPEND ABOTED. $CHKDB records exsist."
-	echo "    Check -d Date argument or database;"
-	echo '        argument is "$DATETARGET",'
-	echo '        SQL like : select * from epss where score_date="$DATETARGET";'
-	exit 1
-else
-	echo "... [ok] DB has $CHKDB recoeds."
-
+if [ ! -d 3rd ]; then
+    mkdir $BASEPATH/epss-data/3rd
 fi
+
+
+# database check
+
+# commentout.Because it will be slow depending on the index settings.
+#CHKCNT=""
+#echo "database record exists check..."
+#CHKCNT=`mysql --defaults-extra-file=/opt/epss-db/my.conf -u root epssdb -N -B -e "select count(*) from epssdb where date=\"$DATETARGET\";"`
+#echo "... [info] $DATETARGET is $CHKCNT rows."
+
 
 # file check
 echo "file exists check..."
-FILE="./epss-data/3rd/epss_scores-$DATETARGET.csv.gz"
+GZFILE="$BASEPATH/epss-data/3rd/epss_scores-$DATETARGET.csv.gz"
 
-if [ -e $FILE ]; then
-	echo "NG: Target File is exists."
-	echo "    Check $FILE and remove it."
-	exit 1
+if [ -e $GZFILE ]; then
+        echo "NG: Target File is exists."
+        echo "    Check $GZFILE and remove it."
+        exit 1
 else
-	echo "... [ok] FILE is NOT EXISTS.($FILE)"
+        echo "... [ok] FILE is NOT EXISTS.($GZFILE)"
 fi
+
 
 # file download and argument date check.
 echo "file doanload..."
-cd epss-data/3rd
-WGETFILE="https://epss.cyentia.com/epss_scores-$DATETARGET.csv.gz"
-#wget -q https://epss.cyentia.com/epss_scores-$DATETARGET.csv.gz
-wget -q $WGETFILE
+cd $BASEPATH/epss-data/3rd
+WGETURL="https://epss.cyentia.com/epss_scores-$DATETARGET.csv.gz"
+wget -q $WGETURL
 if [ $? -ne 0 ]; then
-       	echo "NG: Target data can not download."
-	echo "    Check wget -q https://epss.cyentia.com/epss_scores-$DATETARGET.csv.gz command."
-	exit 1
+        echo "NG: Target data can not download."
+        echo "    Check wget -q https://epss.cyentia.com/epss_scores-$DATETARGET.csv.gz command."
+        exit 1
 else
-	echo "... [ok] DATA downloaded.($WGETFILE)"
-
+        echo "... [ok] DATA downloaded.($WGETURL)"
 fi
 cd ../../
 
+
 # preProcessing
 echo "preProcess..."
-CSVFILE="./epss-data/3rd/epss_scores-$DATETARGET.csv"
-OUTFILE="./epss-data/epss_scores-$DATETARGET.csv"
-gunzip $FILE
-MODEL=`head -n 1 $CSVFILE | grep "#model_version"| sed -e "s/#model_version:\(.*\),score.*/\1/g"`
-grep -v "cve.epss" $CSVFILE | grep -v "#model_version"| sed -e "s/^\(.*\)$/\1,$MODEL,$DATETARGET/g" > $OUTFILE
-gzip $CSVFILE
-
+UNGZFILE="$BASEPATH/epss-data/3rd/epss_scores-$DATETARGET.csv"
+OUTFILE="$BASEPATH/epss-data/epss_scores-$DATETARGET.csv"
+gunzip $GZFILE
+MODEL=`head -n 1 $UNGZFILE | grep "#model_version"| sed -e "s/#model_version:\(.*\),score.*/\1/g"`
+grep -v "cve.epss" $UNGZFILE | grep -v "#model_version" | sed -e "s/^\(.*\),\(.*,.*\)$/\"\1\",\2,\"$MODEL\",\"$DATETARGET\"/g" > $OUTFILE
+gzip $UNGZFILE
 echo "... [ok] CSV file created.($OUTFILE); no checked."
+
 
 # import data
 echo "data import"
 echo "    Please wait for data import about ..."
-echo "        If sqlite3 has many indexes, neeed to FEW HOURS."
-echo "        Has no indexes, need to LESS THAN 30MINUTES"
-sqlite3 ./epss-db.sqlite3 ".mode csv" ".import $OUTFILE epss"
+echo "        If the index is the default, it will be completed in about 10 minutes."
+echo "OUTFILE=$OUTFILE"
+mysql --defaults-extra-file=/opt/epss-db/my.cnf -u root epssdb -e "load data infile '$OUTFILE' into table epssdb fields terminated by ',' enclosed by '\"' (cve,epss,percentile,model,date);"
+
 echo "... [ok] IMPORT Database finished.; no checked."
 echo "-------"
 echo "FINISH ALL IMPORTS DATA."
 echo "    - target date  : $DATETARGET"
-echo "    - original file: $FILE"
-echo "               url : $WGETFILE"
+echo "    - original file: $GZFILE"
+echo "               url : $WGETURL"
 echo "    - csv file     : $OUTFILE"
-echo "CHECK DATABASE as "
-echo "    $ sqlite3 epss-database.sqlite3"
-echo "    > select count(*) from epss where score_date=\"$DATETARGET\";"
+echo "FINISHED"
