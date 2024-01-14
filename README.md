@@ -126,6 +126,9 @@ If you want to add data for a specific day, please use epss-add.sh.
     - preprocessing
     - database import
   - Checks are performed to prevent duplicate data from being registered.
+- epssquery.sh
+  - This is a script for easy access to mysql console.
+    - Execute "./epssquery.sh" -> MySQL console "mysql> "
 
 # UNIMPRLEMENTED
 
