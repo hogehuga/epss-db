@@ -129,6 +129,10 @@ If you want to add data for a specific day, please use epss-add.sh.
 - epssquery.sh
   - This is a script for easy access to mysql console.
     - Execute "./epssquery.sh" -> MySQL console "mysql> "
+- epss-autoAdd.sh
+  - This is a script that looks at the data entered in the DB and inserts the data up to the latest date.
+  - From: Adds 1 day to the latest date registered in the DB, To: yesterday
+    - This script just automatically passes the date to epss-add.sh.
 
 # UNIMPRLEMENTED
 
