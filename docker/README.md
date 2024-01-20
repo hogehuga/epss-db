@@ -1,15 +1,21 @@
-# how2use
+# remove epss-db
 
-- `$ docker pull hogehuga/epss-db`
-- `$ docker volume create epssdbVolume`
-- `$ docker container run --name epssdb -v epssdbVolume:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=mysql -d hogehuga/epss-db`
-- `$ docker exec -it epssdb /bin/bash`
-- ``
-- ``
-
+- remove container
+  - `$ docker ps`
+  - `$ docker stop <target>`
+  - `$ docker ps -a`
+  - `$ docker rm <target>`
+- remove docker image
+  - `$ docker rmi hogehuga/epss-db`
+- remove docker volumes
+  - `$ docker volume ls`
+  - `$ docker volume rm epssDB`
+  - `$ docker volume rm epssFile`
+- creanup shared folder
 
 # update images(devel)
 
+- modify hogehuga/epss-db
 - `$ cd docker`
 - `$ docker build -t hogehuga/epss-db:<version> .`
 - `$ docker login`
