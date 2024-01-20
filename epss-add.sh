@@ -22,7 +22,6 @@ done
 if ! $DATEFLAG; then
     echo "NG: argument is not set."
     echo "  use -d YYYY-MM-DD arguments."
-    B
     echo "   ; Please specify 2022-02-04 or later."
     exit 1
 fi
@@ -45,15 +44,6 @@ echo "... [ok] chk argument: $DATETARGET"
 if [ ! -d 3rd ]; then
     mkdir $BASEPATH/epss-data/3rd
 fi
-
-
-# database check
-
-# commentout.Because it will be slow depending on the index settings.
-#CHKCNT=""
-#echo "database record exists check..."
-#CHKCNT=`mysql --defaults-extra-file=/opt/epss-db/my.conf -u root epssdb -N -B -e "select count(*) from epssdb where date=\"$DATETARGET\";"`
-#echo "... [info] $DATETARGET is $CHKCNT rows."
 
 
 # file check
@@ -101,6 +91,7 @@ echo "    Please wait for data import about ..."
 echo "        If the index is the default, it will be completed in about 10 minutes."
 echo "OUTFILE=$OUTFILE"
 mysql --defaults-extra-file=/opt/epss-db/my.cnf -u root epssdb -e "load data infile '$OUTFILE' into table epssdb fields terminated by ',' enclosed by '\"' (cve,epss,percentile,model,date);"
+rm $OUTFILE
 
 echo "... [ok] IMPORT Database finished.; no checked."
 echo "-------"
