@@ -143,7 +143,8 @@ If you want to change gnuplot options, edit the skel-<CVE-ID>.plt file.
 ; -> Similar to above, but creates images for all registered periods
 
 ```
-!()[./Documents/epss-graph.png]  !()[./Documents/epss-graph_-a.png]
+![period option true](./Documents/epss-graph.png)
+![period option false](./Documents/epss-graph_-a.png)
 
 
 ## Update EPSS data
