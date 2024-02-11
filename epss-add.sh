@@ -29,20 +29,22 @@ fi
 ## date check
 ## if before 3rd pattern date, stoped.
 DATECOMPARE="2022-02-04"
-TARGETSECOUNDS=$(date -d "$DATETARGET" +%s)
-COMPARESECOUNDS=$(date -d "$DATECOMPARE" +%s)
+TARGETSECONDS=$(date -d "$DATETARGET" +%s)
+COMPARESECONDS=$(date -d "$DATECOMPARE" +%s)
 
-if [ $TARGETSECOUNDS -lt $COMPARESECONDS ]; then
+if [ $TARGETSECONDS -lt $COMPARESECONDS ]; then
 echo "bad"
     echo "NG: Invalid date."
     echo "Please specify 2022-02-04 or later."
     return 1
 fi
 
-if [ ! -d 3rd ]; then
-    mkdir $BASEPATH/epss-data/3rd
-fi
+DIRECTORY="/opt/epss-db/epss-data/3rd"
 
+if [ ! -d "$DIRECTORY" ]; then
+    mkdir -p "$DIRECTORY"
+    echo "Directory $DIRECTORY created."
+fi
 
 # file check
 GZFILE="$BASEPATH/epss-data/3rd/epss_scores-$DATETARGET.csv.gz"
