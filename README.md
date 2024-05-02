@@ -10,6 +10,9 @@ README.md was created using Google Translate.
 
 # What's NEW!
 
+- 2024-05-02 JST
+  - CISA Known Exploited Vulnerabilities Catalog(a.k.a KEV Catalog) is comming!
+    - epssdb/kevcatalog table available.
 - 2024-01-21 JST
   - epss-graph.sh is comming! Plot EPSS/Percentile graph by CVE-ID.
 - 2024-01-20 JST
@@ -28,6 +31,8 @@ EPSS is Exploit Prediction Scoreing Syste from FIRST ( https://www.first.org/eps
 I want to analyze EPSS, but I don't need to use SIEM, so I wanted something that could be analyzed using SQL.
 We thought it was important to first implement something simple and have it widely used.
 
+And The KEV catalog is now also included in the database. I think the range of use will be further expanded by combining it with EPSS's cveID.
+
 An environment where Docker can be executed is required.
 
 # System configuration
@@ -45,7 +50,10 @@ An environment where Docker can be executed is required.
 - docker/
   - epss-db Dockerfile
 - init-script/
-  - Script to run for the first time.
+  - epss-init.sh
+    - The first script to run when using EPSS.
+  - kev-init.sh
+    - The first script to run when using KEV Catalog.
 - epss-data/
   - The contents differ depending on when the data was provided, so we save it separately in 1st/2nd/3rd directories.
   - Download EPSS .gz data.
@@ -65,7 +73,7 @@ An environment where Docker can be executed is required.
 
 # How to use this.
 
-## setup
+## setup EPSS database
 
 Get Dockaer image
 
@@ -94,12 +102,26 @@ Prepare the data
 $ docker exec -it epssdb /bin/bash
 (work inside a container)
 # cd /opt/epss-db/init-script
-# ./init.sh
+# ./epss-init.sh
 ```
 
 Once your data is ready, all you need to do is use it!
 
-## Data analysis
+
+### optional: KEV Catalog
+
+run EPSS container.
+
+Init for The KEV Catalog database.
+```
+$ docker exec -it epssdb /bin/bash
+(work inside a container)
+# cd /opt/epss-db/init-script
+# ./kev-init.sh
+```
+
+
+## Data analysis: EPSS
 
 Enter the container and use SQL commands to perform analysis.
 
@@ -175,3 +197,75 @@ $ docker container run --name epssdbNEWNAME -v epssDB:/var/lib/mysql -v epssFile
 NOTE:
 - Databases(/var/lib/mysql as "epssDB" docker volume) and files(/opt/epss-db/epss-data as "epssFile" docker volume) will be inherited.
 ```
+
+## Optional: KEV Catalog search
+
+At the moment, we are using SQL.
+
+```
+$ docker exec -it epssdb /bin/bash
+(work inside a container)
+# cd /opt/epss-db
+# ./epssquery.sh
+mysql> select YEAR(dateAdded) as year, count(dateAdded) as count from kevcatalog group by year ;
++------+-------+
+| year | count |
++------+-------+
+| 2021 |   311 |
+| 2022 |   555 |
+| 2023 |   187 |
+| 2024 |    51 |
++------+-------+
+4 rows in set (0.00 sec)
+
+mysql> select epssdb.cve, epssdb.epss, epssdb.percentile, kevcatalog.dateAdded, kevcatalog.vendorProject, kevcatalog.knownRansomwareCampaignUse fr
+om epssd
++----------------+---------+------------+------------+---------------+----------------------------+
+| cve            | epss    | percentile | dateAdded  | vendorProject | knownRansomwareCampaignUse |
++----------------+---------+------------+------------+---------------+----------------------------+
+| CVE-2021-44529 | 0.97068 |    0.99757 | 2024-03-25 | Ivanti        | Unknown                    |
++----------------+---------+------------+------------+---------------+----------------------------+
+1 row in set (0.09 sec)
+
+mysql>
+```
+
+## Optional: KEV Catalog update
+
+Unlike CVSS etc., it does not provide differences, so please delete the database and re-register it.
+
+```
+# cd /opt/epss-db
+# ./kev-refresh.sh
+CVE-nnnn-nnnn
+...
+#
+```
+
+- As of May 2024, it takes about 1 minute and 30 seconds to complete in my environment.
+
+
+# technical note
+
+## EPSS data
+
+Since there was no definition, I typed it appropriately.
+
+## KEV Catalog data
+
+https://www.cisa.gov/known-exploited-vulnerabilities-catalog
+- Schema is https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities_schema.json
+
+|field                     |original json type|note                      |mysql Table  |
+|:-------------------------|:-----------------|:-------------------------|-------------|
+|id                        |(not exist)       |(for RDBMS)               |int, not Null|
+|cveID                     |string            |^CVE-[0-9]{4}-[0-9]{4,19}$|varchar(20)  |
+|vendorProject             |string            |                          |text         |
+|product                   |string            |                          |text         |
+|vulnerabilityName         |string            |                          |text         |
+|dateAdded                 |string            |format: YYYY-MM-DD        |date         |
+|shortDescription          |string            |                          |text         |
+|requiredAction            |string            |                          |text         |
+|dueDate                   |string            |format: YYYY-MM-DD        |date         |
+|knownRansomwareCampaignUse|string            |(Known or Unknown only?)  |text         |
+|notes                     |string            |                          |text         |
