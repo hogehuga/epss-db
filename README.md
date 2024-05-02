@@ -218,8 +218,7 @@ mysql> select YEAR(dateAdded) as year, count(dateAdded) as count from kevcatalog
 +------+-------+
 4 rows in set (0.00 sec)
 
-mysql> select epssdb.cve, epssdb.epss, epssdb.percentile, kevcatalog.dateAdded, kevcatalog.vendorProject, kevcatalog.knownRansomwareCampaignUse fr
-om epssd
+mysql> select epssdb.cve, epssdb.epss, epssdb.percentile, kevcatalog.dateAdded, kevcatalog.vendorProject, kevcatalog.knownRansomwareCampaignUse from epssdb INNER JOIN kevcatalog ON epssdb.cve = kevcatalog.cveID where epssdb.cve="CVE-2021-44529" and epssdb.date="2024-04-20";
 +----------------+---------+------------+------------+---------------+----------------------------+
 | cve            | epss    | percentile | dateAdded  | vendorProject | knownRansomwareCampaignUse |
 +----------------+---------+------------+------------+---------------+----------------------------+
