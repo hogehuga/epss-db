@@ -248,7 +248,14 @@ CVE-nnnn-nnnn
 
 ## EPSS data
 
-Since there was no definition, I typed it appropriately.
+| Field      | Type        |
+|:-----------|:------------|
+| id         | int         |
+| cve        | varchar(20) |
+| epss       | double      |
+| percentile | double      |
+| model      | varchar(20) |
+| date       | date        |
 
 ## KEV Catalog data
 
