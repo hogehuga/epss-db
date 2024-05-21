@@ -17,6 +17,7 @@
 
 - modify hogehuga/epss-db
 - `$ cd docker`
-- `$ docker build -t hogehuga/epss-db:<version> .`
+- `$ docker bulder prune -f` (キャッシュ削除)
+- `$ docker build . -t hogehuga/epss-db:<version> -t hogehuga/epss-db:latest`
 - `$ docker login`
-- `$ docker push hogehuga/epss-db`
+- `$ docker push hogehuga/epss-db -a`
