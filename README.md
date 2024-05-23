@@ -8,8 +8,15 @@ Download all epss data, and import database. We can explore the data by SQL quer
 
 README.md was created using Google Translate.
 
+Supported data
+- epss
+- KEV Catalog
+- Vulnrichment
+
 # What's NEW!
 
+- 2024-05-23 JST
+  - Experimental suport: Vulnrichment data!
 - 2024-05-02 JST
   - CISA Known Exploited Vulnerabilities Catalog(a.k.a KEV Catalog) is comming!
     - epssdb/kevcatalog table available.
