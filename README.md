@@ -17,6 +17,8 @@ Supported data
 
 - 2024-05-23 JST
   - Experimental suport: Vulnrichment data!
+    - Please refer to the following for details.
+    - https://github.com/hogehuga/richmentdb
 - 2024-05-02 JST
   - CISA Known Exploited Vulnerabilities Catalog(a.k.a KEV Catalog) is comming!
     - epssdb/kevcatalog table available.
