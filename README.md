@@ -8,8 +8,17 @@ Download all epss data, and import database. We can explore the data by SQL quer
 
 README.md was created using Google Translate.
 
+Supported data
+- epss
+- KEV Catalog
+- Vulnrichment
+
 # What's NEW!
 
+- 2024-05-23 JST
+  - Experimental suport: Vulnrichment data!
+    - Please refer to the following for details.
+    - https://github.com/hogehuga/richmentdb
 - 2024-05-02 JST
   - CISA Known Exploited Vulnerabilities Catalog(a.k.a KEV Catalog) is comming!
     - epssdb/kevcatalog table available.
@@ -47,29 +56,64 @@ An environment where Docker can be executed is required.
 
 ## File and Directory
 
-- docker/
-  - epss-db Dockerfile
-- init-script/
-  - epss-init.sh
-    - The first script to run when using EPSS.
-  - kev-init.sh
-    - The first script to run when using KEV Catalog.
-- epss-data/
-  - The contents differ depending on when the data was provided, so we save it separately in 1st/2nd/3rd directories.
-  - Download EPSS .gz data.
-- skel/
-  - skelton(template) file directory.
-- epss-add.sh
-  - This is a script that downloads data for a specific day and registers it in the database.
-- epss-autoAdd.sh
-  - This is a script that registers all data up to the previous day. I created this because it is a pain to run epss-add.sh for multiple days.
-  - Normally, use this.
+
+```
+/opt/epss-db
+|-- Documents
+|   |-- epss-graph.png
+|   `-- epss-graph_-a.png
+|-- LICENSE
+|-- README.md
+|-- docker
+|   |-- Dockerfile
+|   |-- README.md
+|   `-- env
+|-- epss-graph.sh
+|-- init-script
+|   |-- epss-init.sh
+|   |-- kev-init.sh
+|   `-- vulnrichment-init.sh
+|-- my.cnf
+|-- queryConsole.sh
+|-- skel
+|   `-- plot.plt
+|-- subprogram
+|   |-- epss-add.sh
+|   `-- vulnrichUpdate.sh
+|-- update-all.sh
+|-- update-epss.sh
+|-- update-kev.sh
+`-- update-vulnrich.sh
+```
+
 - epss-graph.sh
   - Once you pass your CVE-ID, a graph will show you your EPSS and percentile changes over the past 180 days.
-- epssquery.sh
-  - This is a script to easily open the mysql console.
+- epss-data
+  - The contents differ depending on when the data was provided, so we save it separately in 1st/2nd/3rd directories.
+  - Download EPSS .gz data.
+  - and store MySQL Load file.
+- init-script/
+  - The first script to run when using EPSS, KEV Catalog, Vulnrichment.
 - my.cnf
   - Settings for accessing the mysql console.
+- queryConsole.sh
+  - This is a script to easily open the mysql console.
+- skel
+  - skelton(template) file directory.
+- subprogram
+  - epss-add.sh
+    - This is a script that downloads data for a specific day and registers it in the database.
+  - vulnrichUpdate.sh
+- update-all.sh
+  - alias for execute all update script(update-epss/kev/vunrich)
+- update-epss.sh
+  - Update EPSS database.
+- update-kev.sh
+  - Update KEV Catalog database.
+- update-vulnrich.sh
+  - Update Vulnrichment database.
+
+
 
 # How to use this.
 
@@ -118,6 +162,19 @@ $ docker exec -it epssdb /bin/bash
 (work inside a container)
 # cd /opt/epss-db/init-script
 # ./kev-init.sh
+```
+
+### experimental: Vunlrichment
+
+run EPSS container
+
+Init for The Vulnrichment database
+```
+$ docker exec -it epssdb /bin/bash
+(work inside a container)
+# cd /opt/epss-db/init-script
+# ./vulnrichment-init.sh
+
 ```
 
 
@@ -242,6 +299,46 @@ CVE-nnnn-nnnn
 ```
 
 - As of May 2024, it takes about 1 minute and 30 seconds to complete in my environment.
+
+
+## Experimental: Vulnrichment search
+
+```
+mysql> select adpSSVCAutomatable, count(*) from summary group by adpSSVCAutomatable;
++--------------------+----------+
+| adpSSVCAutomatable | count(*) |
++--------------------+----------+
+| no                 |     2653 |
+| Yes                |      558 |
+|                    |       41 |
++--------------------+----------+
+3 rows in set (0.01 sec)
+
+mysql>
+```
+
+## Experimental: Vulnrichment update
+
+Since the data update status is unknown, please delete all data and register again.
+
+```
+# /opt/epss-db/update-vulnrich.sh
+```
+
+## Experimental: Vulnrichment remove
+
+1. remove from database
+
+```
+# /opt/epss-db/queryConsole.sh
+> drop table richment;
+```
+
+2. remove local repositories file
+
+```
+# rm -rf /opt/epss-db/ulnrichment
+```
 
 
 # technical note
