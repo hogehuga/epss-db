@@ -59,17 +59,48 @@ An environment where Docker can be executed is required.
   - Download EPSS .gz data.
 - skel/
   - skelton(template) file directory.
-- epss-add.sh
-  - This is a script that downloads data for a specific day and registers it in the database.
+- subprogram/
+  - epss-add.sh
+    - This is a script that downloads data for a specific day and registers it in the database.
 - epss-autoAdd.sh
   - This is a script that registers all data up to the previous day. I created this because it is a pain to run epss-add.sh for multiple days.
   - Normally, use this.
 - epss-graph.sh
   - Once you pass your CVE-ID, a graph will show you your EPSS and percentile changes over the past 180 days.
-- epssquery.sh
+- queryConsole.sh
   - This is a script to easily open the mysql console.
 - my.cnf
   - Settings for accessing the mysql console.
+
+```
+/opt/epss-db
+|-- Documents
+|   |-- epss-graph.png
+|   `-- epss-graph_-a.png
+|-- LICENSE
+|-- README.md
+|-- docker
+|   |-- Dockerfile
+|   |-- README.md
+|   `-- env
+|-- epss-graph.sh
+|-- init-script
+|   |-- epss-init.sh
+|   |-- kev-init.sh
+|   `-- vulnrichment-init.sh
+|-- my.cnf
+|-- queryConsole.sh
+|-- skel
+|   `-- plot.plt
+|-- subprogram
+|   |-- epss-add.sh
+|   `-- vulnrichUpdate.sh
+|-- update-all.sh
+|-- update-epss.sh
+|-- update-kev.sh
+`-- update-vulnrich.sh
+```
+
 
 # How to use this.
 
@@ -118,6 +149,19 @@ $ docker exec -it epssdb /bin/bash
 (work inside a container)
 # cd /opt/epss-db/init-script
 # ./kev-init.sh
+```
+
+### experimental: Vunlrichment
+
+run EPSS container
+
+Init for The Vulnrichment database
+```
+$ docker exec -it epssdb /bin/bash
+(work inside a container)
+# cd /opt/epss-db/init-script
+# ./vulnrichment-init.sh
+
 ```
 
 
@@ -242,6 +286,46 @@ CVE-nnnn-nnnn
 ```
 
 - As of May 2024, it takes about 1 minute and 30 seconds to complete in my environment.
+
+
+## Experimental: Vulnrichment search
+
+```
+mysql> select adpSSVCAutomatable, count(*) from summary group by adpSSVCAutomatable;
++--------------------+----------+
+| adpSSVCAutomatable | count(*) |
++--------------------+----------+
+| no                 |     2653 |
+| Yes                |      558 |
+|                    |       41 |
++--------------------+----------+
+3 rows in set (0.01 sec)
+
+mysql>
+```
+
+## Experimental: Vulnrichment update
+
+Since the data update status is unknown, please delete all data and register again.
+
+```
+# /opt/epss-db/update-vulnrich.sh
+```
+
+## Experimental: Vulnrichment remove
+
+1. remove from database
+
+```
+# /opt/epss-db/queryConsole.sh
+> drop table richment;
+```
+
+2. remove local repositories file
+
+```
+# rm -rf /opt/epss-db/ulnrichment
+```
 
 
 # technical note
