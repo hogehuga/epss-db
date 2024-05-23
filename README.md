@@ -54,30 +54,6 @@ An environment where Docker can be executed is required.
 
 ## File and Directory
 
-- docker/
-  - epss-db Dockerfile
-- init-script/
-  - epss-init.sh
-    - The first script to run when using EPSS.
-  - kev-init.sh
-    - The first script to run when using KEV Catalog.
-- epss-data/
-  - The contents differ depending on when the data was provided, so we save it separately in 1st/2nd/3rd directories.
-  - Download EPSS .gz data.
-- skel/
-  - skelton(template) file directory.
-- subprogram/
-  - epss-add.sh
-    - This is a script that downloads data for a specific day and registers it in the database.
-- epss-autoAdd.sh
-  - This is a script that registers all data up to the previous day. I created this because it is a pain to run epss-add.sh for multiple days.
-  - Normally, use this.
-- epss-graph.sh
-  - Once you pass your CVE-ID, a graph will show you your EPSS and percentile changes over the past 180 days.
-- queryConsole.sh
-  - This is a script to easily open the mysql console.
-- my.cnf
-  - Settings for accessing the mysql console.
 
 ```
 /opt/epss-db
@@ -107,6 +83,34 @@ An environment where Docker can be executed is required.
 |-- update-kev.sh
 `-- update-vulnrich.sh
 ```
+
+- epss-graph.sh
+  - Once you pass your CVE-ID, a graph will show you your EPSS and percentile changes over the past 180 days.
+- epss-data
+  - The contents differ depending on when the data was provided, so we save it separately in 1st/2nd/3rd directories.
+  - Download EPSS .gz data.
+  - and store MySQL Load file.
+- init-script/
+  - The first script to run when using EPSS, KEV Catalog, Vulnrichment.
+- my.cnf
+  - Settings for accessing the mysql console.
+- queryConsole.sh
+  - This is a script to easily open the mysql console.
+- skel
+  - skelton(template) file directory.
+- subprogram
+  - epss-add.sh
+    - This is a script that downloads data for a specific day and registers it in the database.
+  - vulnrichUpdate.sh
+- update-all.sh
+  - alias for execute all update script(update-epss/kev/vunrich)
+- update-epss.sh
+  - Update EPSS database.
+- update-kev.sh
+  - Update KEV Catalog database.
+- update-vulnrich.sh
+  - Update Vulnrichment database.
+
 
 
 # How to use this.
